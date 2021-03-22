@@ -1,0 +1,26 @@
+# Team 22 Common Services Back end
+This is the Team 22 backend for common services. This repository deals with any common files that the `demand` and `supply` side might have.
+In this directory it includes two html files:
+
+- `html/login.html`
+- `html/register.html`
+
+# Modifying This Repo
+### Cloning repository
+***Before you star you must have Python 3.8 installed in your system***  
+If you would like to contribute to this repository, you first must clone this repository by running:  
+```git clone https://bitbucket.org/swe-spring-2021-team-22/team22-common-services.git```  
+  
+### Setting Up Environment
+After doing so, go to the `team22-common-services` directory using command line or PyCharm Terminal and we will install the `env` environment for your setup by running:  
+`python3 -m venv env`  
+  
+### Activating Environment
+Now that you have the environment, in order to be in the environment you type:  
+`source env/bin/activate`  
+  
+### Installing/Uninstalling Dependencies
+Make sure you install dependencies. You do so by running `python3 -m pip install -r requirements.txt`. If you added more or removed dependencies and need to generate a new `requirements.txt`, you do so by running `pip freeze > requirements.txt`.
+  
+### Deactivating Environment
+Now you should be in the `env` environment. To get out of the environment you type `deactivate` in command line.
