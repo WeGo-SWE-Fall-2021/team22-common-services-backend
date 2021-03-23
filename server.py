@@ -32,8 +32,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             if registeredUsernameCount == 0:
                 # Convert user objet to JSON and add it to mongo
                 user = User(postData)
-                parsed_user = json.dumps(user.__dict__)
-                db.user.insert_one(parsed_user)
+                db.user.insert_one(user.__dict__)
 
                 status = 201  # HTTP Request: Created, Only if the user was registered
         elif '/login' in path:
