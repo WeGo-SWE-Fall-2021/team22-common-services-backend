@@ -1,9 +1,6 @@
 # Team 22 Common Services Back end
-This is the Team 22 backend for common services. This repository deals with any common files that the `demand` and `supply` side might have.
-In this directory it includes two html files:
+This is the Team 22 backend for common services. This repository deals with any requests handled in `/api/v1/common-servicee/[request-name]/` for both `demand` and `supply` services.
 
-- `html/login.html`
-- `html/register.html`
 
 # Modifying This Repo
 ### Cloning repository
@@ -21,6 +18,9 @@ Now that you have the environment, in order to be in the environment you type:
   
 ### Installing/Uninstalling Dependencies
 Make sure you install dependencies. You do so by running `python3 -m pip install -r requirements.txt`. If you added more or removed dependencies and need to generate a new `requirements.txt`, you do so by running `pip freeze > requirements.txt`.
-  
+
+#### .env file ####
+This file you have to make on your own. It should be on the project directory. If you notice, `MongoUtils.py` script uses `MONGO_SECRET`, which needs to be defined in `.env` file. This holds our mongo database `developer` password.
+
 ### Deactivating Environment
 Now you should be in the `env` environment. To get out of the environment you type `deactivate` in command line.
