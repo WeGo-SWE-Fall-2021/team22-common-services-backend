@@ -1,3 +1,5 @@
 # Ignoring venv variable backend
 env/*
 .idea/*
+__pycache__/
+.env
