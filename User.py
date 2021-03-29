@@ -1,62 +1,58 @@
 class User:
-
     # class constructor, takes a dictionary, which is the JSON passed from the HTTP Post, as an argument and
     # populates class attributes
     def __init__(self, postData):
-        self.username = postData["username"]
-        self.fName = postData["fname"]
-        self.lName = postData["lname"]
-        self.email = postData["email"]
-        self.address = postData["address"]
-        self.password = postData["password"]
-        self.phoneNumber = postData["phoneNumber"]
+        self._fname = postData["fname"]
+        self._lname = postData["lname"]
+        self._phoneNumber = postData["phoneNumber"]
+        self._email = postData["email"]
+        self._username = postData["username"]
+        self._password = postData["password"]
 
-    # basic set methods
-    def setUsername(self, username):
-        self.username = username
+    @property
+    def username(self):
+        return self._username
 
-    def setfName(self, fName):
-        self.fName = fName
+    @username.setter
+    def username(self, value):
+        self._username = value
 
-    def setlName(self, lName):
-        self.lName = lName
+    @property
+    def fname(self):
+        return self._fname
 
-    def setDOB(self, dob):
-        self.dob = dob
+    @fname.setter
+    def fname(self, value):
+        self._fname = value
 
-    def setEmail(self, email):
-        self.email = email
+    @property
+    def lname(self):
+        return self._lname
 
-    def setAddress(self, address):
-        self.address = address
+    @lname.setter
+    def lname(self, value):
+        self._lname = value
 
-    def setPassword(self, password):
-        self.password = password
+    @property
+    def email(self):
+        return self._email
 
-    def setPhoneNumber(self, phoneNumber):
-        self.phoneNumber = phoneNumber
+    @email.setter
+    def email(self, value):
+        self._email = value
 
-    # basic get methods
-    def getUsername(self):
-        return self.username
+    @property
+    def password(self):
+        return self._password
 
-    def getfName(self):
-        return self.fName
+    @password.setter
+    def password(self, value):
+        self._password = value
 
-    def getlName(self):
-        return self.lName
+    @property
+    def phoneNumber(self):
+        return self._phoneNumber
 
-    def getDOB(self):
-        return self.dob
-
-    def getEmail(self):
-        return self.email
-
-    def getAddress(self):
-        return self.address
-
-    def getPassword(self):
-        return self.password
-
-    def getPhoneNumber(self):
-        return self.phoneNumber
+    @phoneNumber.setter
+    def phoneNumber(self, value):
+        self._phoneNumber = value

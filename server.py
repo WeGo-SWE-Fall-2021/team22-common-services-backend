@@ -1,4 +1,5 @@
 import json
+import bcrypt
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
 from MongoUtils import initMongoFromCloud
@@ -30,45 +31,62 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
         # receiving registration requests and writing their data to the database
         if '/register' in path:
+            status = 401
+            responseBody = {
+                'status': 'failed',
+                'message': 'There is already a user registered with that username'  # TODO: Distinguish similarities
+            }
+
             # TODO: add email address soon, but as of now username is fine
-            registeredUsernameCount = db.user.count_documents({"username": postData["username"]})
+            user = User(postData)
+            registeredUsernameCount = db.user.count_documents({"username": user.username})
             if registeredUsernameCount == 0:
-                # Convert user objet to JSON and add it to mongo
-                user = User(postData)
-                db.user.insert_one(user.__dict__)
+                # hash and salt password
+                password = user.password.encode()
+                salt = bcrypt.gensalt()
+                hashed = bcrypt.hashpw(password, salt)
+
+                user.password = hashed
+                # Insert data to database
+                db.user.insert_one({
+                    "fname": user.fname,
+                    "lname": user.lname,
+                    "phoneNumber": user.phoneNumber,
+                    "email": user.email,
+                    "username": user.username,
+                    "password": user.password
+                })
 
                 status = 201  # HTTP Request: Created, Only if the user was registered
                 responseBody = {
                     'status': 'success',
                     'message': 'Successfully registered user.'
                 }
-            else:
-                status = 401  # HTTP Request: Unauthorized
-                responseBody = {
-                    'status': 'failed',
-                    'message': 'There is already a user registered with the username'  # TODO: Distinguish similarities
-                }
         elif '/login' in path:
-            # TODO hash + salt password to see if that password is found
-            validCredentials = db.user.count_documents({"username": postData["username"],
-                                                        "password": postData["password"]})
-            if validCredentials > 0:
-                status = 200
-                responseBody = {
-                    'status': 'success',
-                    'message': 'Successfully logged in.',
-                    'authentication': ''  # TODO Add Authentication token
-                }
-            else:
-                status = 401
-                responseBody = {
-                    'status': 'failed',
-                    'message': 'Failed to find user with provided information'
-                }
+            status = 401
+            responseBody = {
+                'status': 'failed',
+                'message': 'Failed to find user with provided information'
+            }
+
+            data = db.user.find_one({"username": postData["username"]})
+            if data is not None:
+                user = User(data)
+                password = postData["password"].encode()
+                # check password that was on database with the provided password
+                matched = bcrypt.checkpw(password, user.password)
+                if matched:
+                    status = 200
+                    responseBody = {
+                        'status': 'success',
+                        'message': 'Successfully logged in.',
+                        'authentication': ''  # TODO Add Authentication token
+                    }
+
         self.send_response(status)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
-        responseString = json.dumps(responseBody).encode('utf-8')
+        responseString = json.dumps(responseBody).encode()
         self.wfile.write(responseString)
         client.close()
 
