@@ -89,9 +89,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     token = db.user.find_one({"username": user.username})["token"]
                     responseBody = {
                         'status': 'success',
-                        'message': 'Successfully logged in.',
-                        'token': token
+                        'message': 'Successfully logged in.'
                     }
+                    self.send_header("Set-Cookie", "token=" + token)
 
         self.send_response(status)
         self.send_header("Content-Type", "text/html")
