@@ -94,7 +94,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         'status': 'success',
                         'message': 'Successfully logged in.'
                     }
-                    headers["Set-Cookie"] = "token=" + token
+                    url = cloud + ".team22.sweispring21.tk"
+                    headers["Set-Cookie"] = "token=" + token + "; Domain=" + url + "; Secure; HttpOnly"
 
         self.send_response(status)
         # Send headers from dictionary
