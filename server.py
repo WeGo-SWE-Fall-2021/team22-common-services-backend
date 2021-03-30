@@ -26,6 +26,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         cloud = postData['cloud']
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
+        headers = {
+            "Content-Type": "text/html"
+        }
         responseBody = {
             'status': 'failed',
             'message': 'Request not found'
@@ -91,10 +94,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         'status': 'success',
                         'message': 'Successfully logged in.'
                     }
-                    self.send_header("Set-Cookie", "token=" + token)
+                    headers["Set-Cookie"] = "token=" + token
 
         self.send_response(status)
-        self.send_header("Content-Type", "text/html")
+        # Send headers from dictionary
+        for key in headers:
+            self.send_header(key, headers[key])
         self.end_headers()
         responseString = json.dumps(responseBody).encode()
         self.wfile.write(responseString)
