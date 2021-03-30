@@ -1,5 +1,7 @@
 import json
 import bcrypt
+import hashlib
+from random import randint
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
 from MongoUtils import initMongoFromCloud
@@ -47,6 +49,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 hashed = bcrypt.hashpw(password, salt)
 
                 user.password = hashed
+
+
+                # generate secure token
+                ip = self.client_address[0]
+                token = hashlib.sha256(user.username + ip) + randint(0, 999)
+
+
                 # Insert data to database
                 db.user.insert_one({
                     "fname": user.fname,
@@ -54,7 +63,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     "phoneNumber": user.phoneNumber,
                     "email": user.email,
                     "username": user.username,
-                    "password": user.password
+                    "password": user.password,
+                    "token" : token
                 })
 
                 status = 201  # HTTP Request: Created, Only if the user was registered
@@ -77,10 +87,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 matched = bcrypt.checkpw(password, user.password)
                 if matched:
                     status = 200
+
+                    token = db.user.find_one({ "username" : user.username})["token"]
+
                     responseBody = {
                         'status': 'success',
                         'message': 'Successfully logged in.',
-                        'authentication': ''  # TODO Add Authentication token
+                        'token': token
                     }
 
         self.send_response(status)
