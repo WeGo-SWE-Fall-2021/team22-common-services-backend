@@ -1,6 +1,8 @@
 import json
 import bcrypt
 import hashlib
+import urllib.parse as urlparse
+from urllib.parse import parse_qs
 from random import getrandbits
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
@@ -9,7 +11,16 @@ from User import User
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    version = '0.0.1'
+    version = '0.1.0'
+
+    def writeRequest(self, status, headers, response):
+        self.send_response(status)
+        # Send headers from dictionary
+        for key in headers:
+            self.send_header(key, headers[key])
+        self.end_headers()
+        responseString = json.dumps(response).encode()
+        self.wfile.write(responseString)
 
     # Reads the POST data from the HTTP header
     def extract_POST_Body(self):
@@ -20,16 +31,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     # handle post requests
     def do_POST(self):
+        path = self.path
         status = 404  # HTTP Request: Not found
         postData = self.extract_POST_Body()  # store POST data into a dictionary
-        path = self.path
         cloud = postData['cloud']
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
         headers = {
             "Content-Type": "text/html"
         }
-        responseBody = {
+        response = {
             'status': 'failed',
             'message': 'Request not found'
         }
@@ -37,7 +48,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         # receiving registration requests and writing their data to the database
         if '/register' in path:
             status = 401
-            responseBody = {
+            response = {
                 'status': 'failed',
                 'message': 'There is already a user registered with that username'  # TODO: Distinguish similarities
             }
@@ -70,13 +81,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 })
 
                 status = 201  # HTTP Request: Created, Only if the user was registered
-                responseBody = {
+                response = {
                     'status': 'success',
                     'message': 'Successfully registered user.'
                 }
         elif '/login' in path:
             status = 401
-            responseBody = {
+            response = {
                 'status': 'failed',
                 'message': 'Failed to find user with provided information'
             }
@@ -90,25 +101,44 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 if matched:
                     status = 200
                     token = db.user.find_one({"username": user.username})["token"]
-                    responseBody = {
+                    response = {
                         'status': 'success',
                         'message': 'Successfully logged in.'
                     }
                     url = cloud + ".team22.sweispring21.tk"
                     headers["Set-Cookie"] = "token=" + token + "; Domain=" + url + "; Secure; HttpOnly"
 
-        self.send_response(status)
-        # Send headers from dictionary
-        for key in headers:
-            self.send_header(key, headers[key])
-        self.end_headers()
-        responseString = json.dumps(responseBody).encode()
-        self.wfile.write(responseString)
+        self.writeRequest(status, headers, response)
         client.close()
 
+    # This handles any GET requests
     def do_GET(self):
-        return
+        path = self.path
+        status = 401
+        get_data = dict(urlparse.parse_qsl(urlparse.urlsplit(path).query))
+        cloud = get_data["cloud"]
+        headers = {}
+        response = {}
+        client = initMongoFromCloud(cloud)
+        db = client['team22_' + cloud]
+        if '/user' in path:
+            tokenStr = self.headers["Cookie"]
+            if tokenStr is not None:
+                token = tokenStr.split('=')[1]
+                user = db.user.find_one({"token": token})
+                if user is not None:
+                    user = User(user)
+                    # TODO add extra attributes based on cloud config
+                    status = 200
+                    response = {
+                        "fname": user.fname,
+                        "lname": user.lname,
+                        "email": user.email,
+                        "username": user.username
+                    }
 
+        self.writeRequest(status, headers, response)
+        client.close()
 
 def main():
     port = 4003  # Port 4001 reserved for demand backend
