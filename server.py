@@ -1,3 +1,4 @@
+import datetime
 import json
 import bcrypt
 import hashlib
@@ -38,7 +39,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
         headers = {
-            "Content-Type": "text/html"
+            "Content-Type": "application/json"
         }
         response = {
             'status': 'failed',
@@ -108,6 +109,18 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     url = cloud + ".team22.sweispring21.tk"
                     headers["Set-Cookie"] = "token=" + token + "; Domain=" + url + "; Secure; HttpOnly"
 
+        elif '/logout' in path:
+            url = cloud + ".team22.sweispring21.tk"
+            time_format = "%a, %d %b %Y %H:%M:%S %Z"
+            expires = "%s" % ((datetime.datetime.now() + datetime.timedelta(-1)).strftime(time_format)) + "GMT"
+            print(expires)
+            headers["Set-Cookie"] = "token=; Domain=" + url + "; Secure; HttpOnly; Expire=" + expires + ";"
+            status = 200
+            response = {
+                'status': 'success',
+                'message': 'Successfully logged out.'
+            }
+
         self.writeRequest(status, headers, response)
         client.close()
 
@@ -139,6 +152,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
         self.writeRequest(status, headers, response)
         client.close()
+
 
 def main():
     port = 4003  # Port 4001 reserved for demand backend
