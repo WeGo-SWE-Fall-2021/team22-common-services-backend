@@ -107,14 +107,14 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         'message': 'Successfully logged in.'
                     }
                     url = cloud + ".team22.sweispring21.tk"
-                    headers["Set-Cookie"] = "token=" + token + "; Path=/; SameSite=None; Secure; HttpOnly"
+                    headers["Set-Cookie"] = "token=" + token + "; Domain=" + url + "; Path=/; Secure; HttpOnly"
 
         elif '/logout' in path:
             url = cloud + ".team22.sweispring21.tk"
             time_format = "%a, %d %b %Y %H:%M:%S %Z"
             expires = "%s" % ((datetime.datetime.now() + datetime.timedelta(-1)).strftime(time_format)) + "GMT"
             print(expires)
-            headers["Set-Cookie"] = "token=; Path=/; SameSite=None; Secure; HttpOnly; Expire=" + expires + ";"
+            headers["Set-Cookie"] = "token=; Domain=" + url + "; Path=/; Secure; HttpOnly; Expire=" + expires + ";"
             status = 200
             response = {
                 'status': 'success',
