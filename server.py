@@ -76,7 +76,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     "lname": user.lname,
                     "phoneNumber": user.phoneNumber,
                     "email": user.email,
-                    "username": user.username,
+                    "username": user.username.lower(),
                     "password": user.password,
                     "token": token
                 })
@@ -93,7 +93,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Failed to find user with provided information'
             }
 
-            data = db.user.find_one({"username": postData["username"]})
+            data = db.user.find_one({"username": postData["username"].lower()})
             if data is not None:
                 user = User(data)
                 password = postData["password"].encode()
