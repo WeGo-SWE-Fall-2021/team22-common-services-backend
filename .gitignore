@@ -1,5 +1,17 @@
-# Ignoring venv variable backend
-env/*
-.idea/*
-__pycache__/
+# Hide any vscode workspace
+.vscode
+
+# Hide any idea workspace
+.idea
+
+# Hide python build
+env/
+
+# Hide variable .env file
 .env
+
+# Hide macOS .DS_STORE
+.DS_STORE
+
+# Ignore  python cache
+__pycache__/
