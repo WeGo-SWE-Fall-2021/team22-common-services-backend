@@ -1,13 +1,24 @@
+from bson.objectid import ObjectId
+
+
 class User:
     # class constructor, takes a dictionary, which is the JSON passed from the HTTP Post, as an argument and
     # populates class attributes
     def __init__(self, postData):
+        # If postData dictionary is coming from mongodb, then we need to extract 
+        # the id since it's from an ObjectID class by casting it to a string,
+        # Ids should be generated from mongo db
+        self._id = str(postData.get("_id", ''))
         self._fname = postData["fname"]
         self._lname = postData["lname"]
         self._phoneNumber = postData["phoneNumber"]
         self._email = postData["email"]
         self._username = postData["username"]
         self._password = postData["password"]
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def username(self):
