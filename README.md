@@ -9,6 +9,23 @@ This repository includes `unittest` so that we are able to test our objects and 
 ## REST API for Common Services ## 
 You can view working REST api using [Postman](https://www.getpostman.com/collections/cad786a00f31ea7893bd)
 
+## Structure ##
+```
+team22-common-services-backend
+├── docs                        # Documentation Directory
+├── unittest                    # Unit Test Directory to test Object classes                     
+│   └── user_test_case.py       # Test cases for `User.py` class
+├── mongoutils.py               # Helper class for MongoDB
+├── user.py                     # User class object
+├── server.py                   # The main Python endpoints server
+├── requirements.txt            # Python Dependencies to run `server.py`
+└── README.md                   # Documentation about this repo
+```
+
+> Use short lowercase names for files and folders except for
+> `README.md`
+
+
 ## Modifying This Repo ##
 ### Cloning repository ###
 ***Before you star you must have Python 3.8 installed in your system***  
