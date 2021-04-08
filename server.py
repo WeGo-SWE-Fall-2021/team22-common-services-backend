@@ -7,12 +7,13 @@ from urllib.parse import parse_qs
 from random import getrandbits
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
-from MongoUtils import initMongoFromCloud
-from User import User
+from mongoutils import initMongoFromCloud
+from uuid import uuid4
+from user import User
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    version = '0.1.0'
+    version = '0.1.1'
 
     def writeRequest(self, status, headers, response):
         self.send_response(status)
@@ -38,6 +39,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         cloud = postData['cloud']
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
+        collection = db.Customer if cloud == "demand" else db.FleetManager
         headers = {
             "Content-Type": "application/json"
         }
@@ -54,9 +56,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'There is already a user registered with that username'  # TODO: Distinguish similarities
             }
 
-            # TODO: add email address soon, but as of now username is fine
+            # Generate Unique Id
+            postData["_id"] = uuid4()
             user = User(postData)
-            registeredUsernameCount = db.user.count_documents({"username": user.username})
+            registeredUsernameCount = collection.count_documents({"username": user.username.lower()})
+            registeredEmailCount = collection.count_documents({"email": user.email.lower()})
+
             if registeredUsernameCount == 0:
                 # hash and salt password
                 password = user.password.encode()
@@ -66,20 +71,34 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
                 # generate secure token
                 ip = self.client_address[0].encode()
-                username = user.username.encode()
+                username = user.username.lower().encode()
                 random = str(getrandbits(256)).encode()
                 token = hashlib.sha256(username + ip + random).hexdigest()
 
+                extraData = {}
+                # Extra attributes for FleetManager if it's coming from supply cloud
+                if (cloud == "supply"):
+                    extraData["dockAddress"] = ""
+                    extraData["dockNumber"] = ""
+                    extraData["fleetIDs"] = []
+
+                # Common Data for FleetManager and Customer Database
+                data = {
+                        "_id": user.id,
+                        "firstName": user.firstName,
+                        "lastName": user.lastName,
+                        "phoneNumber": user.phoneNumber,
+                        "email": user.email.lower(),
+                        "username": user.username.lower(),
+                        "password": user.password,
+                        "token": token
+                }
+
+                # Specifically for FleetManager if it needs extra attributes
+                data.update(extraData)
+
                 # Insert data to database
-                db.user.insert_one({
-                    "fname": user.fname,
-                    "lname": user.lname,
-                    "phoneNumber": user.phoneNumber,
-                    "email": user.email,
-                    "username": user.username.lower(),
-                    "password": user.password,
-                    "token": token
-                })
+                collection.insert_one(data)
 
                 status = 201  # HTTP Request: Created, Only if the user was registered
                 response = {
@@ -93,7 +112,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Failed to find user with provided information'
             }
 
-            data = db.user.find_one({"username": postData["username"].lower()})
+            data = collection.find_one({"username": postData["username"].lower()})
             if data is not None:
                 user = User(data)
                 password = postData["password"].encode()
@@ -101,7 +120,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 matched = bcrypt.checkpw(password, user.password)
                 if matched:
                     status = 200
-                    token = db.user.find_one({"username": user.username})["token"]
+                    token = collection.find_one({"username": user.username.lower()})["token"]
                     response = {
                         'status': 'success',
                         'message': 'Successfully logged in.'
@@ -113,7 +132,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             url = cloud + ".team22.sweispring21.tk"
             time_format = "%a, %d %b %Y %H:%M:%S %Z"
             expires = "%s" % ((datetime.datetime.now() + datetime.timedelta(-1)).strftime(time_format)) + "GMT"
-            print(expires)
             headers["Set-Cookie"] = "token=; Domain=" + url + "; Path=/; Secure; HttpOnly; Expire=" + expires + ";"
             status = 200
             response = {
@@ -134,18 +152,20 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         response = {}
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
+        collection = db.Customer if cloud == "demand" else db.FleetManager
+
         if '/user' in path:
             tokenStr = self.headers["Cookie"]
             if tokenStr is not None:
                 token = tokenStr.split('=')[1]
-                user = db.user.find_one({"token": token})
+                user = collection.find_one({"token": token})
                 if user is not None:
                     user = User(user)
                     # TODO add extra attributes based on cloud config
                     status = 200
                     response = {
-                        "fname": user.fname,
-                        "lname": user.lname,
+                        "fname": user.firstName,
+                        "lname": user.lastName,
                         "email": user.email,
                         "username": user.username
                     }
