@@ -8,25 +8,11 @@ image: python:3.8
 pipelines:
   default:
     - step:
-        name: Setup Python Version
+        name: Build and Unit Test
         script:
           - python3 --version
-
-    - step:
-        name: Create and start venv
-        script:
           - python3 -m venv env
           - source env/bin/activate
-
-    - step:
-        name: Install Python Dependencies
-        caches:
-          - pip
-        script:
           - if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
-
-    - step:
-        name: Unit Test Cases
-        script:
           - cd unittest
           - python3 -m unittest discover -p "*test*.py" -v

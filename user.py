@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 class User:
-    version = "0.1.2"
+    version = "0.1.3"
 
     # class constructor, takes a dictionary, which is the JSON passed from the HTTP Post, as an argument and
     # populates class attributes
