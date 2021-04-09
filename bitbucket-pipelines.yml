@@ -24,7 +24,7 @@ pipelines:
                 SSH_USER: $USER
                 SERVER: $DEMAND_SERVER
                 MODE: "command"
-                COMMAND: "/home/team22/webhooks/team22_redeploy.sh ${BITBUCKET_REPO_SLUG}"
+                COMMAND: "/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG}"
 
       - step:
           name: Deploy to Supply Cloud
@@ -34,5 +34,5 @@ pipelines:
                 SSH_USER: $USER
                 SERVER: $SUPPLY_SERVER
                 MODE: "command"
-                COMMAND: "/home/team22/webhooks/team22_redeploy.sh ${BITBUCKET_REPO_SLUG}"
+                COMMAND: "/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG}"
 
