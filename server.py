@@ -56,8 +56,6 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'There is already a user registered with that username'  # TODO: Distinguish similarities
             }
 
-            # Generate Unique Id
-            postData["_id"] = uuid4()
             user = User(postData)
             registeredUsernameCount = collection.count_documents({"username": user.username.lower()})
             registeredEmailCount = collection.count_documents({"email": user.email.lower()})
