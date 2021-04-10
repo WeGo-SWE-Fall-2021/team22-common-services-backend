@@ -3,16 +3,26 @@
 image: python:3.8
 
 definitions:
+  services:
+    mongo:
+      image: mongo
   steps:
     - step: &build-and-unittest
         name: Build and Unit Test
         script:
+          - wget https://repo.mongodb.org/apt/debian/dists/buster/mongodb-org/4.4/main/binary-amd64/mongodb-org-shell_4.4.5_amd64.deb && apt install ./mongodb-org-shell_4.4.5_amd64.deb
+          - mongo --port 27017 --eval 'db.getSiblingDB("admin").createUser({ user:"admin", pwd:"'"$MONGO_ADMIN_PW"'", roles:[{role:"root", db:"admin"}]})'
+          - mongo --port 27017 -u 'admin' -p $MONGO_ADMIN_PW --authenticationDatabase 'admin' --eval 'db.getSiblingDB("team22_demand").createUser({ user:"developer", pwd:"'"$MONGO_TEAM_PW"'", roles:["readWrite"]})'
+          - mongo --port 27017 -u 'admin' -p $MONGO_ADMIN_PW --authenticationDatabase 'admin' --eval 'db.getSiblingDB("team22_supply").createUser({ user:"developer", pwd:"'"$MONGO_TEAM_PW"'", roles:["readWrite"]})'
+          - echo 'MONGO_SECRET="'"$MONGO_TEAM_PW"'"' > .env
           - python3 --version
           - python3 -m venv env
           - source env/bin/activate
           - if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
           - cd unittest
           - python3 -m unittest discover -p "*test*.py" -v
+        services: 
+          - mongo
 
 pipelines:
   default:

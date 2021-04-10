@@ -137,8 +137,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Successfully logged out.'
             }
 
-        self.writeRequest(status, headers, response)
         client.close()
+        self.writeRequest(status, headers, response)
 
     # This handles any GET requests
     def do_GET(self):
