@@ -78,7 +78,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 if (cloud == "supply"):
                     extraData["dockAddress"] = ""
                     extraData["dockNumber"] = ""
-                    extraData["fleetIDs"] = []
+                    extraData["fleetIds"] = []
 
                 # Common Data for FleetManager and Customer Database
                 data = {
