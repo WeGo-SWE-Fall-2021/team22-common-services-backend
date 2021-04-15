@@ -37,7 +37,7 @@ pipelines:
       - parallel:
         - step:
             name: Deploy to Demand Cloud Production
-            deployment: production
+            deployment: production-demand
             clone:
               enabled: false
             script:
@@ -50,7 +50,7 @@ pipelines:
 
         - step:
             name: Deploy to Supply Cloud Production
-            deployment: production
+            deployment: production-supply
             clone:
               enabled: false
             script:
