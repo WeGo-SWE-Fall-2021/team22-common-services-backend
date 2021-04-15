@@ -41,12 +41,7 @@ pipelines:
             clone:
               enabled: false
             script:
-              - pipe: atlassian/ssh-run:0.3.0
-                variables:
-                  SSH_USER: $USER
-                  SERVER: $DEMAND_SERVER
-                  MODE: "command"
-                  COMMAND: "/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT} "
+              - ssh -i ~/.ssh/config $USER@$DEMAND_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
 
         - step:
             name: Deploy to Supply Cloud Production
@@ -54,10 +49,4 @@ pipelines:
             clone:
               enabled: false
             script:
-              - pipe: atlassian/ssh-run:0.3.0
-                variables:
-                  SSH_USER: $USER
-                  SERVER: $SUPPLY_SERVER
-                  MODE: "command"
-                  COMMAND: "/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}"
-
+              - ssh -i ~/.ssh/config $USER@$SUPPLY_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
