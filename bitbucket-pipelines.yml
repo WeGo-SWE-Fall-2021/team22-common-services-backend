@@ -41,8 +41,7 @@ pipelines:
             clone:
               enabled: false
             script:
-              - cat ~/.ssh/*
-              - ssh $USER@$DEMAND_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
+              - ssh -A -tt -i /opt/atlassian/pipelines/agent/ssh/id_rsa -o 'StrictHostKeyChecking=no' -p ${PORT:-22} $USER@$DEMAND_SERVER "bash -c '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'"
 
         - step:
             name: Deploy to Supply Cloud Production
@@ -50,5 +49,4 @@ pipelines:
             clone:
               enabled: false
             script:
-              - cat ~/.ssh/*
-              - ssh $USER@$SUPPLY_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
+              - ssh -A -tt -i /opt/atlassian/pipelines/agent/ssh/id_rsa -o 'StrictHostKeyChecking=no' -p ${PORT:-22} $USER@$SUPPLY_SERVER "bash -c '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'"
