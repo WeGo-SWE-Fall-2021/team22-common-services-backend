@@ -41,6 +41,7 @@ pipelines:
             clone:
               enabled: false
             script:
+              - cat ~/.ssh/*
               - ssh $USER@$DEMAND_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
 
         - step:
@@ -49,4 +50,5 @@ pipelines:
             clone:
               enabled: false
             script:
+              - cat ~/.ssh/*
               - ssh $USER@$SUPPLY_SERVER '/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT}'
