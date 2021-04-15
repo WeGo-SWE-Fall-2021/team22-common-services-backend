@@ -8,4 +8,5 @@ pymongo==3.11.3
 python-dotenv==0.16.0
 requests==2.25.1
 six==1.15.0
+unittest-xml-reporting==3.0.4
 urllib3==1.26.4

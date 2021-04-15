@@ -15,3 +15,6 @@ env/
 
 # Ignore  python cache
 __pycache__/
+
+# Ignore test reports thst are created locally
+test-reports/

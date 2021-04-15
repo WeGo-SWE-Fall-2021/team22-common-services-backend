@@ -2,6 +2,7 @@ import unittest
 import sys
 import time
 import requests
+import xmlrunner
 
 from threading import Thread
 
@@ -118,4 +119,4 @@ class ServerTestCase(unittest.TestCase):
         cls._server_thread.join()
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
