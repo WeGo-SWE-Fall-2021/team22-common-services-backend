@@ -36,8 +36,8 @@ pipelines:
 
       - parallel:
         - step:
-            name: Deploy to Demand Cloud
-            deployment: production-demand
+            name: Deploy to Demand Cloud Production
+            deployment: production
             clone:
               enabled: false
             script:
@@ -49,8 +49,8 @@ pipelines:
                   COMMAND: "/home/team22/webhooks/team22-redeploy.sh ${BITBUCKET_REPO_SLUG} ${BITBUCKET_COMMIT} "
 
         - step:
-            name: Deploy to Supply Cloud
-            deployment: production-supply
+            name: Deploy to Supply Cloud Production
+            deployment: production
             clone:
               enabled: false
             script:
