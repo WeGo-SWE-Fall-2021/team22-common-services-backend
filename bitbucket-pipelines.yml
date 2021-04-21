@@ -4,6 +4,8 @@ image: python:3.8
 
 definitions:
   caches:
+    xmllint: /usr/bin/
+    uuidgen: /usr/bin/
     mongo: /usr/bin/
   services:
     mongo:
@@ -22,14 +24,63 @@ definitions:
           - echo 'MONGO_SECRET="'"$MONGO_TEAM_PW"'"' > .env
           - if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
           - cd unittest
-          - python3 -m xmlrunner discover -p "*test*.py" -o ./test-reports/  
+          - >
+            for i in *.py; do 
+                PY_MODULE=$(echo $i | cut -d '_' -f 1);  
+                python3 -m pytest --junitxml test-reports/${PY_MODULE}_report.xml --cov-report xml:${PY_MODULE}_coverage.xml --cov $PY_MODULE ${PY_MODULE}_test_case.py;
+            done
+          - cd ..
+        artifacts:
+            - unittest/*_coverage.xml
         services: 
           - mongo
 
+    - step: &coverage-report
+        name: Coverage Report
+        clone:
+          enabled: false
+        caches:
+          - uuidgen
+          - xmllint
+        script:
+          - apt-get update
+          - apt install uuid-runtime libxml2-utils
+          - >
+            for i in unittest/*_coverage.xml; do
+                REPORT_ID=$(uuidgen)
+                LINES_VALID=$(xmllint --xpath '/coverage/@lines-valid' unittest/user_coverage.xml | grep -v ">" | cut -f 2 -d "=" | tr -d \");
+                LINES_COVERED=$(xmllint --xpath '/coverage/@lines-covered' unittest/user_coverage.xml | grep -v ">" | cut -f 2 -d "=" | tr -d \");
+                COVERAGE=$(((LINES_COVERED / LINES_VALID) * 100));
+                if [[ $COVERAGE -gt 50 ]]; then STATE="PASSED"; else STATE="FAILED"; fi
+                FILE_NAME=$(echo `basename $i` | cut -d '_' -f 1);
+                curl --request PUT https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_FULL_NAME/commit/$BITBUCKET_COMMIT/reports/$REPORT_ID \
+                --header 'Authorization: Basic "'"$USER_AUTH"'"' \
+                --header 'Content-Type: application/json' \
+                --data-raw '{
+                        "title": "'$FILE_NAME'.py Coverage Report",
+                        "details": "This pull request has been scanned and checked for coverage report for `'"$FILE_NAME"'.py`.",
+                        "report_type": "COVERAGE",
+                        "reporter": "Pipelines",
+                        "result": "'$STATE'",
+                        "data": [
+                          {
+                            "title": "Coverage:",
+                            "type": "PERCENTAGE",
+                            "value": '$COVERAGE'
+                          }
+                        ]
+                }'
+            done
+
 pipelines:
+  pull-requests:
+    '**':
+      - step: *build-and-unittest
+      - step: *coverage-report
+
   default:
     - step: *build-and-unittest
-
+  
   branches:
     master:
       - step: *build-and-unittest

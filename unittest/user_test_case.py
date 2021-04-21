@@ -1,57 +1,38 @@
 import unittest
 import sys
-import xmlrunner
 
 sys.path.insert(1, "../")
 from user import User
 
+user_data_1 = {
+    "_id": "1515646454",
+    "firstName": "firstname",
+    "lastName": "lastname",
+    "phoneNumber": "11111",
+    "email": "email@email.com",
+    "username": "user",
+    "password": "pwdtest"
+}
 
 class UserTestCase(unittest.TestCase):
 
     def test_user_creation(self):
-        data = {
-            "_id": "1515646454",
-            "firstName": "firstname",
-            "lastName": "lastname",
-            "phoneNumber": "11111",
-            "email": "email@email.com",
-            "username": "user",
-            "password": "pwdtest"
-        }
-        user = User(data)
+        user = User(user_data_1)
         self.assertIsNotNone(user)
 
     def test_user_data_equals(self):
-        data = {
-            "_id": "1515646454",
-            "firstName": "firstname",
-            "lastName": "lastname",
-            "phoneNumber": "11111",
-            "email": "email@email.com",
-            "username": "user",
-            "password": "pwdtest"
-        }
-        user = User(data)
+        user = User(user_data_1)
         self.assertIsNotNone(user)
-        self.assertEqual(user.id, "1515646454")
-        self.assertEqual(user.firstName, "firstname")
-        self.assertEqual(user.lastName, "lastname")
-        self.assertEqual(user.phoneNumber, "11111")
-        self.assertEqual(user.email, "email@email.com")
-        self.assertEqual(user.username, "user")
-        self.assertEqual(user.password, "pwdtest")
+        self.assertEqual(user.id, user_data_1["_id"])
+        self.assertEqual(user.firstName, user_data_1["firstName"])
+        self.assertEqual(user.lastName, user_data_1["lastName"])
+        self.assertEqual(user.phoneNumber, user_data_1["phoneNumber"])
+        self.assertEqual(user.email, user_data_1["email"])
+        self.assertEqual(user.username, user_data_1["username"])
+        self.assertEqual(user.password, user_data_1["password"])
 
     def test_user_data_change(self):
-        data = {
-            "_id": "1515646454",
-            "firstName": "firstname",
-            "lastName": "lastname",
-            "phoneNumber": "11111",
-            "email": "email@email.com",
-            "username": "user",
-            "password": "pwdtest"
-        }
-        user = User(data)
+        user = User(user_data_1)
         with self.assertRaises(AttributeError):
             user.id = "new_id"
         user.username = "new_username"
@@ -69,4 +50,4 @@ class UserTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
+    unittest.main()

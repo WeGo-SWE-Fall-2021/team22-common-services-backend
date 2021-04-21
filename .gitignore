@@ -18,3 +18,15 @@ __pycache__/
 
 # Ignore test reports thst are created locally
 test-reports/
+
+# Ignore coverage
+.coverage
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore annotations
+*-annotate/
+
+# Ignore coverage report
+*_coverage.xml
