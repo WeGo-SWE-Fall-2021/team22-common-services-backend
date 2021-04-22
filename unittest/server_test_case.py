@@ -3,10 +3,10 @@ import sys
 import time
 import requests
 
-from threading import Thread
+sys.path.insert(1, sys.path[0] + "/../")
 
-sys.path.insert(1, "../")
-from mongoutils import initMongoFromCloud
+from threading import Thread
+from utils.mongoutils import initMongoFromCloud
 from http.server import HTTPServer
 from server import SimpleHTTPRequestHandler
 

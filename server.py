@@ -3,11 +3,12 @@ import json
 import bcrypt
 import hashlib
 import urllib.parse as urlparse
+
 from urllib.parse import parse_qs
 from random import getrandbits
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
-from mongoutils import initMongoFromCloud
+from utils.mongoutils import initMongoFromCloud
 from uuid import uuid4
 from user import User
 
