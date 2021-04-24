@@ -49,6 +49,10 @@ class UserTestCase(unittest.TestCase):
         user.phoneNumber = "00000"
         self.assertEqual(user.phoneNumber, "00000")
 
+    def test_user_equality(self):
+        user_one = User(user_data_1)
+        user_two = User(user_data_1)
+        self.assertEqual(user_one, user_two)
 
 if __name__ == '__main__':
     unittest.main()

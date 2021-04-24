@@ -3,14 +3,18 @@ import json
 import bcrypt
 import hashlib
 import urllib.parse as urlparse
+import jwt
+import os
 
 from urllib.parse import parse_qs
-from random import getrandbits
 from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
 from utils.mongoutils import initMongoFromCloud
 from uuid import uuid4
 from user import User
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -61,18 +65,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             registeredUsernameCount = collection.count_documents({"username": user.username.lower()})
             registeredEmailCount = collection.count_documents({"email": user.email.lower()})
 
-            if registeredUsernameCount == 0:
+            if registeredUsernameCount == 0 and registeredEmailCount == 0:
                 # hash and salt password
                 password = user.password.encode()
                 salt = bcrypt.gensalt()
                 hashed = bcrypt.hashpw(password, salt)
                 user.password = hashed
-
-                # generate secure token
-                ip = self.client_address[0].encode()
-                username = user.username.lower().encode()
-                random = str(getrandbits(256)).encode()
-                token = hashlib.sha256(username + ip + random).hexdigest()
 
                 extraData = {}
                 # Extra attributes for FleetManager if it's coming from supply cloud
@@ -89,8 +87,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         "phoneNumber": user.phoneNumber,
                         "email": user.email.lower(),
                         "username": user.username.lower(),
-                        "password": user.password,
-                        "token": token
+                        "password": user.password
                 }
 
                 # Specifically for FleetManager if it needs extra attributes
@@ -114,18 +111,24 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             data = collection.find_one({"username": postData["username"].lower()})
             if data is not None:
                 user = User(data)
-                password = postData["password"].encode()
+                password = postData["password"]
                 # check password that was on database with the provided password
-                matched = bcrypt.checkpw(password, user.password)
+                matched = bcrypt.checkpw(password.encode('utf-8'), user.password)
                 if matched:
                     status = 200
-                    token = collection.find_one({"username": user.username.lower()})["token"]
+                    token_secret = os.getenv("TOKEN_SECRET")
+                    token_payload = {
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                        'iat': datetime.datetime.utcnow(),
+                        'user_id': user.id
+                    }
+                    auth_token = jwt.encode(token_payload, token_secret, algorithm="HS256")
+                    url = cloud + ".team22.sweispring21.tk"
+                    headers["Set-Cookie"] = "token=" + auth_token + "; Domain=" + url + "; Path=/; Secure; HttpOnly"
                     response = {
                         'status': 'success',
                         'message': 'Successfully logged in.'
                     }
-                    url = cloud + ".team22.sweispring21.tk"
-                    headers["Set-Cookie"] = "token=" + token + "; Domain=" + url + "; Path=/; Secure; HttpOnly"
 
         elif '/logout' in path:
             url = cloud + ".team22.sweispring21.tk"
@@ -145,31 +148,47 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path
         status = 401
-        get_data = dict(urlparse.parse_qsl(urlparse.urlsplit(path).query))
-        cloud = get_data["cloud"]
-        headers = {}
-        response = {}
+        data_url = dict(urlparse.parse_qsl(urlparse.urlsplit(path).query))
+        cloud = data_url["cloud"]
         client = initMongoFromCloud(cloud)
         db = client['team22_' + cloud]
         collection = db.Customer if cloud == "demand" else db.FleetManager
+        headers = {}
+        response_body = {}
 
         if '/user' in path:
+            status = 401
+            response_body = {
+                "status": "failed",
+                "message": "failed to retreive user: user not found"
+            }
+
             tokenStr = self.headers["Cookie"]
             if tokenStr is not None:
                 token = tokenStr.split('=')[1]
-                user = collection.find_one({"token": token})
-                if user is not None:
-                    user = User(user)
-                    # TODO add extra attributes based on cloud config
-                    status = 200
-                    response = {
-                        "fname": user.firstName,
-                        "lname": user.lastName,
-                        "email": user.email,
-                        "username": user.username
+                try:
+                    token_secret = os.getenv("TOKEN_SECRET")
+                    token_decoded = jwt.decode(token, token_secret, algorithms="HS256")
+                    user = collection.find_one({ "_id": token_decoded["user_id"]})
+                    if user is not None:
+                        user = User(user)
+                        status = 200
+                        response_body = {
+                            "status": "success",
+                            "message": "Successfully retreived user information",
+                            "user": {
+                                "firstName": user.firstName,
+                                "lastName": user.lastName,
+                                "email": user.email,
+                                "username": user.username
+                            }
+                        }
+                except:
+                    response_body = {
+                        "status": "failed",
+                        "message": "failed to retreive user with token"
                     }
-
-        self.writeRequest(status, headers, response)
+        self.writeRequest(status, headers, response_body)
         client.close()
 
 

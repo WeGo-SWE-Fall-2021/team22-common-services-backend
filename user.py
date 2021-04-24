@@ -68,3 +68,14 @@ class User:
     @password.setter
     def password(self, value):
         self._password = value
+
+    def __eq__(self, value):
+        if isinstance(value, User):
+            return self.id == value.id and \
+                    self.firstName == value.firstName and \
+                    self.lastName == value.lastName and \
+                    self.phoneNumber == value.phoneNumber and \
+                    self.email == value.email and \
+                    self.username == value.username and \
+                    self.password == value.password
+        return False
