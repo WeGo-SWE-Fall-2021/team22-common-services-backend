@@ -165,7 +165,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
             tokenStr = self.headers["Cookie"]
             if tokenStr is not None:
-                token = tokenStr.split('=')[1]
+                token = tokenStr.split('token=')[1].split(";")[0]
                 try:
                     token_secret = os.getenv("TOKEN_SECRET")
                     token_decoded = jwt.decode(token, token_secret, algorithms="HS256")
