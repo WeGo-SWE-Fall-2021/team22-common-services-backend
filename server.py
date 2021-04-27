@@ -75,9 +75,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 extraData = {}
                 # Extra attributes for FleetManager if it's coming from supply cloud
                 if (cloud == "supply"):
-                    extraData["dockAddress"] = ""
-                    extraData["dockNumber"] = ""
-                    extraData["fleetIds"] = []
+                    extraData["dockAddress"] = "1415 S Congress Ave, Austin, TX 78704"
+                    extraData["dockCoordinates"] = "-97.749443,30.249201"
+                    extraData["fleetIds"] = ["food","storage","refrigerated"]
 
                 # Common Data for FleetManager and Customer Database
                 data = {
