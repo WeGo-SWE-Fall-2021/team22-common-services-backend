@@ -77,7 +77,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 if (cloud == "supply"):
                     extraData["dockAddress"] = "1415 S Congress Ave, Austin, TX 78704"
                     extraData["dockCoordinates"] = "-97.749443,30.249201"
-                    extraData["fleetIds"] = ["food","storage","refrigerated"]
+                    extraData["fleetIds"] = []
 
                 # Common Data for FleetManager and Customer Database
                 data = {
