@@ -118,7 +118,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     status = 200
                     token_secret = os.getenv("TOKEN_SECRET")
                     token_payload = {
-                        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2),
                         'iat': datetime.datetime.utcnow(),
                         'user_id': user.id
                     }
