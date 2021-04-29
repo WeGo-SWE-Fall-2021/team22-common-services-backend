@@ -39,7 +39,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     # handle post requests
     def do_POST(self):
         path = self.path
-        status = 404  # HTTP Request: Not found
+        status = 400  # HTTP Request: Not found
         postData = self.extract_POST_Body()  # store POST data into a dictionary
         cloud = postData['cloud']
         client = initMongoFromCloud(cloud)
@@ -58,12 +58,19 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             status = 401
             response = {
                 'status': 'failed',
-                'message': 'There is already a user registered with that username'  # TODO: Distinguish similarities
+                'message': 'There is already a user registered with that username',
+                'values': []
             }
 
             user = User(postData)
             registeredUsernameCount = collection.count_documents({"username": user.username.lower()})
             registeredEmailCount = collection.count_documents({"email": user.email.lower()})
+
+            if registeredEmailCount != 0:
+                response['values'].append({ "id": "email", "message": "Email already taken." })
+
+            if registeredUsernameCount != 0:
+                response['values'].append({ "id": "username", "message": "Username already taken." })
 
             if registeredUsernameCount == 0 and registeredEmailCount == 0:
                 # hash and salt password
@@ -101,6 +108,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     'status': 'success',
                     'message': 'Successfully registered user.'
                 }
+
         elif '/login' in path:
             status = 401
             response = {
