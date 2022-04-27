@@ -120,10 +120,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Failed to find user with provided information'
             }
 
+            cloud = "demand"
             data = db.Customer.find_one({"username": postData["username"].lower()})
 
             if data is None:
                 data = db.FleetManager.find_one({"username": postData["username"].lower()})
+                cloud = "supply"
 
             if data is not None:
                 user = User(data)
@@ -143,7 +145,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     headers["Set-Cookie"] = "token=" + auth_token + "; Domain=" + url + "; Path=/; Secure; HttpOnly"
                     response = {
                         'status': 'success',
-                        'message': 'Successfully logged in.'
+                        'message': 'Successfully logged in.',
+                        'cloud': cloud
                     }
 
         elif '/logout' in path:
