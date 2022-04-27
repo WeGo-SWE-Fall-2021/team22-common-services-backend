@@ -7,7 +7,7 @@ import json
 sys.path.insert(1, sys.path[0] + "/../")
 
 from threading import Thread
-from utils.mongoutils import initMongoFromCloud
+from utils.mongoutils import initMongo
 from http.server import HTTPServer
 from server import SimpleHTTPRequestHandler
 
@@ -25,8 +25,8 @@ user_data_one = {
     "password": "test_password"
 }
 
-demand_client = initMongoFromCloud("demand")
-supply_client = initMongoFromCloud("supply")
+demand_client = initMongo("demand")
+supply_client = initMongo("supply")
 demand_db = demand_client["team22_demand"]
 supply_db = supply_client["team22_supply"]
 
